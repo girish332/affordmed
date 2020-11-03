@@ -6,7 +6,7 @@ import (
 
 var cache = make(map[int]int)
 
-func fib(n int) int {
+func fib(n int, c chan int) {
 	cache[0] = 0
 	cache[1] = 1
 
@@ -15,27 +15,31 @@ func fib(n int) int {
 		val, status := cache[n]
 
 		if status == true {
-
-			return val
+			c <- val
+			// return val
 		} else {
 
-			for i := 2; i <= n; i++ {
+			for i := len(cache); i <= n; i++ {
 
 				cache[i] = cache[i-1] + cache[i-2]
 			}
-
-			return cache[n]
+			c <- cache[n]
+			// return cache[n]
 		}
 
 	} else {
-		return -1
+		c <- -1
+		// return -1
 	}
 
 }
 
 func main() {
 
-	ans := fib(100)
+	c := make(chan int)
+	go fib(10, c)
+	ans := <-c
+	// ans := fib(10)
 
 	if ans >= 0 {
 		fmt.Println(ans)
