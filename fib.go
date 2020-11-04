@@ -2,49 +2,53 @@ package main
 
 import (
 	"fmt"
+	"sync"
 )
 
-var cache = make(map[int]int)
+type cache1 struct {
+	mu sync.Mutex
+	v  map[int]int
+}
 
-func fib(n int, c chan int) {
-	cache[0] = 0
-	cache[1] = 1
+var c = cache1{v: make(map[int]int)}
 
+func fib1(n int) int {
+
+	c.v[0] = 0
+	c.v[1] = 1
+	ans := -1
 	if n >= 0 {
+		c.mu.Lock()
 
-		val, status := cache[n]
+		val, status := c.v[n]
 
 		if status == true {
-			c <- val
-			// return val
+
+			ans = val
+			c.mu.Unlock()
 		} else {
 
-			for i := len(cache); i <= n; i++ {
-
-				cache[i] = cache[i-1] + cache[i-2]
+			for i := len(c.v); i <= n; i++ {
+				c.v[i] = c.v[i-1] + c.v[i-2]
 			}
-			c <- cache[n]
-			// return cache[n]
-		}
+			ans = c.v[n]
 
-	} else {
-		c <- -1
-		// return -1
+			defer c.mu.Unlock()
+		}
 	}
+
+	return ans
 
 }
 
 func main() {
 
-	c := make(chan int)
-	go fib(10, c)
-	ans := <-c
-	// ans := fib(10)
-
-	if ans >= 0 {
-		fmt.Println(ans)
-
+	ans := fib1(10)
+	if ans == -1 {
+		fmt.Println("Cannot find fibo number for negative index")
 	} else {
-		fmt.Println("Cannot calculate fibonacci number for negative index")
+
+		fmt.Println(ans)
 	}
+
 }
