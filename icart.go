@@ -2,22 +2,12 @@ package main
 
 import "fmt"
 
-type person struct {
-	first       string
-	last        string
-	favFlavours []string
-}
-
 type icart struct {
 	id   string
 	name string
 }
 
 var cartSlice = make([]icart, 0)
-
-// type icartSlice struct {
-// 	cartSlice []icart
-// }
 
 func main() {
 
